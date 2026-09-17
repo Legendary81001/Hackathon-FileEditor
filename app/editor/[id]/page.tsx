@@ -8,7 +8,6 @@ import ShareModal from "../../../components/ShareModal";
 
 type IconName = "arrow-left" | "file" | "share" | "more";
 
-// All possible collaborators — the logged-in user will be marked online
 const ALL_COLLABORATORS = [
   { username: "testuser", initials: "TU", color: "bg-[#f0b18f]" },
   { username: "user1",    initials: "U1", color: "bg-[#b8cfb7]" },
@@ -20,32 +19,13 @@ function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   const common = { fill: "none", height: size, viewBox: "0 0 24 24", width: size };
   switch (name) {
     case "arrow-left":
-      return (
-        <svg {...common}>
-          <path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-        </svg>
-      );
+      return <svg {...common}><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" /></svg>;
     case "file":
-      return (
-        <svg {...common}>
-          <path d="M6.5 3.75h7l4 4v12.5h-11V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.6" />
-          <path d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" />
-        </svg>
-      );
+      return <svg {...common}><path d="M6.5 3.75h7l4 4v12.5h-11V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.6" /><path d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" /></svg>;
     case "share":
-      return (
-        <svg {...common}>
-          <path d="M8 12h8M14 6l6 6-6 6M4 5h4v4M4 19h4v-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
-        </svg>
-      );
+      return <svg {...common}><path d="M8 12h8M14 6l6 6-6 6M4 5h4v4M4 19h4v-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" /></svg>;
     case "more":
-      return (
-        <svg {...common}>
-          <circle cx="5" cy="12" fill="currentColor" r="1.4" />
-          <circle cx="12" cy="12" fill="currentColor" r="1.4" />
-          <circle cx="19" cy="12" fill="currentColor" r="1.4" />
-        </svg>
-      );
+      return <svg {...common}><circle cx="5" cy="12" fill="currentColor" r="1.4" /><circle cx="12" cy="12" fill="currentColor" r="1.4" /><circle cx="19" cy="12" fill="currentColor" r="1.4" /></svg>;
   }
 }
 
@@ -55,8 +35,12 @@ function CollaboratorAvatars({ loggedInUsername }: { loggedInUsername: string | 
       {ALL_COLLABORATORS.map((user, index) => {
         const isOnline = user.username === loggedInUsername;
         return (
-          <div key={user.username} className={`relative ${index > 0 ? "-ml-2" : ""}`}>
-            {/* Avatar circle */}
+          <div
+            key={user.username}
+            // KEY FIX: relative + z-index so the dot sits on top of the next overlapping avatar
+            className={`relative ${index > 0 ? "-ml-2" : ""}`}
+            style={{ zIndex: ALL_COLLABORATORS.length - index }}
+          >
             <span
               className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#fffdf8] text-[10px] font-bold text-[#17211b] ${user.color}`}
               title={user.username}
@@ -64,9 +48,9 @@ function CollaboratorAvatars({ loggedInUsername }: { loggedInUsername: string | 
               {user.initials}
             </span>
 
-            {/* Online / offline dot */}
+            {/* Dot is absolutely positioned — z-index on parent ensures it's never hidden */}
             <span
-              className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#fffdf8] ${
+              className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#fffdf8] ${
                 isOnline ? "bg-[#86a889]" : "bg-[#c5cdc6]"
               }`}
             />
@@ -89,12 +73,11 @@ export default function EditorPage() {
   const [loggedInUsername, setLoggedInUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    // Read the user saved at login
     const raw = localStorage.getItem("synora_user");
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
-        setLoggedInUsername(parsed.username ?? null);
+        setLoggedInUsername(typeof parsed === "string" ? parsed : parsed.username ?? null);
       } catch {
         setLoggedInUsername(null);
       }
@@ -135,7 +118,6 @@ export default function EditorPage() {
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            {/* Connection status */}
             <div className="hidden items-center gap-2 text-xs text-[#718075] md:flex">
               <span className={`h-2 w-2 rounded-full ${loggedInUsername ? "bg-[#86a889]" : "bg-[#c5cdc6]"}`} />
               {loggedInUsername ? "Connected" : "Offline"}
