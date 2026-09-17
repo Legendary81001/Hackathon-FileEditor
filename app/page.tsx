@@ -5,62 +5,51 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const users = [
-  { username: "testuser", password: "testpass" },
-  { username: "user1", password: "pass1" },
-  { username: "user2", password: "pass2" },
-  { username: "user3", password: "pass3" },
+  { username: "testuser", initials: "TU", color: "bg-[#f0b18f]" },
+  { username: "user1",    initials: "U1", color: "bg-[#b8cfb7]" },
+  { username: "user2",    initials: "U2", color: "bg-[#e7ba58]" },
+  { username: "user3",    initials: "U3", color: "bg-[#a8c4e0]" },
 ];
+
+const passwords: Record<string, string> = {
+  testuser: "testpass",
+  user1: "pass1",
+  user2: "pass2",
+  user3: "pass3",
+};
 
 function FileIcon() {
   return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height="22"
-      viewBox="0 0 24 24"
-      width="22"
-    >
-      <path
-        d="M6.5 3.75h7l4 4v12.5h-11V3.75Z"
-        stroke="currentColor"
-        strokeLinejoin="round"
-        strokeWidth="1.6"
-      />
-      <path
-        d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.6"
-      />
+    <svg aria-hidden="true" fill="none" height="22" viewBox="0 0 24 24" width="22">
+      <path d="M6.5 3.75h7l4 4v12.5h-11V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.6" />
+      <path d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" />
     </svg>
   );
 }
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError("");
 
-    const user = users.find(
-      (account) =>
-        account.username === username.trim() &&
-        account.password === password
-    );
+    const trimmed = username.trim();
+    const user = users.find((u) => u.username === trimmed);
 
-    if (!user) {
+    if (!user || passwords[trimmed] !== password) {
       setError("Invalid username or password.");
       return;
     }
 
-    // Hackathon-only login state.
-    localStorage.setItem("synora_user", user.username);
+    // Save full user info so editor can read initials + color
+    localStorage.setItem(
+      "synora_user",
+      JSON.stringify({ username: user.username, initials: user.initials, color: user.color })
+    );
 
     router.push("/documents");
   }
@@ -69,13 +58,9 @@ export default function LoginPage() {
     <main className="min-h-screen bg-[#f7f8f3] text-[#17211b]">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-6 sm:px-10 lg:px-16">
         <header className="flex items-center justify-between">
-          <Link
-            className="text-lg font-semibold tracking-tight"
-            href="/"
-          >
+          <Link className="text-lg font-semibold tracking-tight" href="/">
             synora<span className="text-[#db5a3c]">.</span>
           </Link>
-
           <span className="rounded-full border border-[#cad4c8] px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-[#5d6b61]">
             Early access
           </span>
@@ -87,18 +72,12 @@ export default function LoginPage() {
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#17211b] text-[#fffdf8] shadow-sm">
                 <FileIcon />
               </div>
-
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-[#db5a3c]">
                 Welcome back
               </p>
-
-              <h1 className="text-4xl font-semibold tracking-[-0.05em]">
-                Sign in to Synora
-              </h1>
-
+              <h1 className="text-4xl font-semibold tracking-[-0.05em]">Sign in to Synora</h1>
               <p className="mt-3 text-sm leading-6 text-[#718075]">
-                Enter your account details to open your collaborative
-                workspace.
+                Enter your account details to open your collaborative workspace.
               </p>
             </div>
 
@@ -108,37 +87,28 @@ export default function LoginPage() {
             >
               <div className="space-y-5">
                 <div>
-                  <label
-                    className="mb-2 block text-sm font-medium text-[#304833]"
-                    htmlFor="username"
-                  >
+                  <label className="mb-2 block text-sm font-medium text-[#304833]" htmlFor="username">
                     Username
                   </label>
-
                   <input
                     id="username"
                     type="text"
                     value={username}
-                    onChange={(event) => setUsername(event.target.value)}
+                    onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
                     autoComplete="username"
                     className="h-12 w-full rounded-xl border border-[#d5ded3] bg-[#f9faf6] px-4 text-sm text-[#17211b] outline-none transition placeholder:text-[#9aa59b] focus:border-[#86a889] focus:ring-2 focus:ring-[#cbdaca]"
                   />
                 </div>
-
                 <div>
-                  <label
-                    className="mb-2 block text-sm font-medium text-[#304833]"
-                    htmlFor="password"
-                  >
+                  <label className="mb-2 block text-sm font-medium text-[#304833]" htmlFor="password">
                     Password
                   </label>
-
                   <input
                     id="password"
                     type="password"
                     value={password}
-                    onChange={(event) => setPassword(event.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter password"
                     autoComplete="current-password"
                     className="h-12 w-full rounded-xl border border-[#d5ded3] bg-[#f9faf6] px-4 text-sm text-[#17211b] outline-none transition placeholder:text-[#9aa59b] focus:border-[#86a889] focus:ring-2 focus:ring-[#cbdaca]"
@@ -147,9 +117,7 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <p className="mt-5 rounded-xl bg-[#fce9e4] px-4 py-3 text-sm text-[#b64028]">
-                  {error}
-                </p>
+                <p className="mt-5 rounded-xl bg-[#fce9e4] px-4 py-3 text-sm text-[#b64028]">{error}</p>
               )}
 
               <button
@@ -167,10 +135,7 @@ export default function LoginPage() {
             </form>
 
             <p className="mt-6 text-center text-sm text-[#718075]">
-              <Link
-                href="/"
-                className="font-medium text-[#db5a3c] hover:underline"
-              >
+              <Link href="/" className="font-medium text-[#db5a3c] hover:underline">
                 ← Back to home
               </Link>
             </p>
