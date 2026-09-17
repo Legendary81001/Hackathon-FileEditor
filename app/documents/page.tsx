@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import DocumentCard, { type DocumentItem } from "../../components/DocumentCard";
+import DocumentCard, { type DocumentItem } from "../../components/documentcard";
 
 const documents: DocumentItem[] = [
   { id: "1", title: "Project Architecture & Roadmap", description: "A shared view of the product foundations and what comes next.", edited: "Edited 18 minutes ago", section: "Product", accent: "bg-[#dce6d9]", collaborators: ["AM", "JK", "TR"] },

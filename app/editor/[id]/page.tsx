@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Editor from "../../../components/Editor";
-import ShareModal from "../../../components/ShareModal";
+import ShareModal from "../../../components/sharemodal";
 
 type IconName = "arrow-left" | "file" | "share" | "more";
 
