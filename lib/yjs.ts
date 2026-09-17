@@ -1,17 +1,18 @@
-import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
+import { createClient } from "@liveblocks/client";
+import { getYjsProviderForRoom } from "@liveblocks/yjs";
+
+const client = createClient({
+  publicApiKey: process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY!,
+});
 
 export function createYjsProvider(roomId: string) {
-  const ydoc = new Y.Doc();
+  const { room, leave } = client.enterRoom(roomId);
 
-  const provider = new WebsocketProvider(
-    "wss://demos.yjs.dev",
-    roomId,
-    ydoc
-  );
+  const provider = getYjsProviderForRoom(room);
 
   return {
-    ydoc,
     provider,
+    ydoc: provider.getYDoc(),
+    leave,
   };
 }

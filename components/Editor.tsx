@@ -4,18 +4,14 @@ import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
-import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
+import { createYjsProvider } from "../lib/yjs";
 
 type EditorProps = {
   roomId: string;
 };
 
 export default function Editor({ roomId }: EditorProps) {
-  const [ydoc] = useState(() => new Y.Doc());
-  const [provider] = useState(
-    () => new WebsocketProvider("wss://demos.yjs.dev", roomId, ydoc)
-  );
+  const [collaboration] = useState(() => createYjsProvider(roomId));
 
   const editor = useEditor({
     extensions: [
@@ -23,7 +19,7 @@ export default function Editor({ roomId }: EditorProps) {
         undoRedo: false,
       }),
       Collaboration.configure({
-        document: ydoc,
+        document: collaboration.ydoc,
       }),
     ],
     content: "<p>Start writing...</p>",
@@ -31,10 +27,9 @@ export default function Editor({ roomId }: EditorProps) {
 
   useEffect(() => {
     return () => {
-      provider.destroy();
-      ydoc.destroy();
+      collaboration.leave();
     };
-  }, [provider, ydoc]);
+  }, [collaboration]);
 
   if (!editor) {
     return null;
