@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,7 +12,13 @@ type EditorProps = {
   roomId: string;
 };
 
-const users = [
+type User = {
+  username: string;
+  initials: string;
+  color: string;
+};
+
+const users: User[] = [
   {
     username: "testuser",
     initials: "TU",
@@ -35,26 +42,37 @@ const users = [
 ];
 
 export default function Editor({ roomId }: EditorProps) {
-  const [collaboration] = useState(() => createYjsProvider(roomId));
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  const [collaboration] = useState(() =>
+    createYjsProvider(roomId)
+  );
 
   const [synced, setSynced] = useState(
     collaboration.provider.synced
   );
 
-  const [currentUser, setCurrentUser] = useState(users[0]);
-
+  // Get the user who logged in
   useEffect(() => {
     const username = localStorage.getItem("synora_user");
 
-    const user = users.find(
+    if (!username) {
+      setCurrentUser(users[0]);
+      return;
+    }
+
+    const loggedInUser = users.find(
       (user) => user.username === username
     );
 
-    if (user) {
-      setCurrentUser(user);
+    if (loggedInUser) {
+      setCurrentUser(loggedInUser);
+    } else {
+      setCurrentUser(users[0]);
     }
   }, []);
 
+  // Wait for the Yjs document to synchronize
   useEffect(() => {
     if (collaboration.provider.synced) {
       setSynced(true);
@@ -86,13 +104,17 @@ export default function Editor({ roomId }: EditorProps) {
           document: collaboration.ydoc,
         }),
 
-        CollaborationCaret.configure({
-          provider: collaboration.provider,
-          user: {
-            name: currentUser.username,
-            color: currentUser.color,
-          },
-        }),
+        ...(currentUser
+          ? [
+              CollaborationCaret.configure({
+                provider: collaboration.provider,
+                user: {
+                  name: currentUser.username,
+                  color: currentUser.color,
+                },
+              }),
+            ]
+          : []),
       ],
 
       immediatelyRender: false,
@@ -100,7 +122,7 @@ export default function Editor({ roomId }: EditorProps) {
     [synced, currentUser]
   );
 
-  if (!synced || !editor) {
+  if (!synced || !editor || !currentUser) {
     return (
       <main className="min-h-screen bg-[#f7f8f3] p-8">
         <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
@@ -118,3 +140,4 @@ export default function Editor({ roomId }: EditorProps) {
     </main>
   );
 }
+
