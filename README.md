@@ -11,7 +11,6 @@ The editor uses Yjs for conflict-free replicated editing and Liveblocks for real
 ## Tech Stack
 
 * Next.js
-* React
 * TypeScript
 * TipTap
 * Yjs
