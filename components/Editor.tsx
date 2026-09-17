@@ -5,12 +5,34 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCaret from "@tiptap/extension-collaboration-caret";
-import EditorToolbar from "./EditorToolbar";
 import { createYjsProvider } from "../lib/yjs";
 
 type EditorProps = {
   roomId: string;
 };
+
+const users = [
+  {
+    username: "testuser",
+    initials: "TU",
+    color: "#f0b18f",
+  },
+  {
+    username: "user1",
+    initials: "U1",
+    color: "#b8cfb7",
+  },
+  {
+    username: "user2",
+    initials: "U2",
+    color: "#e7ba58",
+  },
+  {
+    username: "user3",
+    initials: "U3",
+    color: "#a8c4e0",
+  },
+];
 
 export default function Editor({ roomId }: EditorProps) {
   const [collaboration] = useState(() => createYjsProvider(roomId));
@@ -18,6 +40,20 @@ export default function Editor({ roomId }: EditorProps) {
   const [synced, setSynced] = useState(
     collaboration.provider.synced
   );
+
+  const [currentUser, setCurrentUser] = useState(users[0]);
+
+  useEffect(() => {
+    const username = localStorage.getItem("synora_user");
+
+    const user = users.find(
+      (user) => user.username === username
+    );
+
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, []);
 
   useEffect(() => {
     if (collaboration.provider.synced) {
@@ -41,8 +77,6 @@ export default function Editor({ roomId }: EditorProps) {
 
   const editor = useEditor(
     {
-      immediatelyRender: false,
-
       extensions: [
         StarterKit.configure({
           undoRedo: false,
@@ -55,14 +89,15 @@ export default function Editor({ roomId }: EditorProps) {
         CollaborationCaret.configure({
           provider: collaboration.provider,
           user: {
-            name: `User ${Math.floor(Math.random() * 1000)}`,
-            color: "#7c3aed",
+            name: currentUser.username,
+            color: currentUser.color,
           },
         }),
       ],
-      content: "<p>Start writing...</p>",
+
+      immediatelyRender: false,
     },
-    [synced]
+    [synced, currentUser]
   );
 
   if (!synced || !editor) {
@@ -76,19 +111,9 @@ export default function Editor({ roomId }: EditorProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8f3]">
-      <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl bg-white shadow-sm">
-
-        {/* Formatting toolbar */}
-        <EditorToolbar editor={editor} />
-
-        {/* Document */}
-        <div className="min-h-[650px] p-8 sm:p-10">
-          <div className="editor-content">
-            <EditorContent editor={editor} />
-          </div>
-        </div>
-
+    <main className="min-h-screen bg-[#f7f8f3] p-8">
+      <div className="tiptap mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
+        <EditorContent editor={editor} />
       </div>
     </main>
   );
