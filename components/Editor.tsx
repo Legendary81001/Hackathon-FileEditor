@@ -164,7 +164,7 @@ return ( <main className="min-h-screen bg-[#f7f8f3] p-8"> <div className="mx-aut
 
 return ( <main className="min-h-screen bg-[#f7f8f3] p-8"> <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl bg-white shadow-sm"> <EditorToolbar editor={editor} />
 
-    <div className="tiptap p-8">
+    <div className="tiptap editor-content p-8">
       <EditorContent editor={editor} />
     </div>
   </div>
