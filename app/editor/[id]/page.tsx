@@ -1,20 +1,15 @@
 import Link from "next/link";
 
+import EditorToolbar from "../../../components/EditorToolbar";
+
 type IconName =
 	| "arrow-left"
 	| "bold"
 	| "check"
-	| "chevron-down"
 	| "file"
-	| "image"
-	| "italic"
-	| "link"
-	| "list"
 	| "more"
-	| "redo"
 	| "share"
-	| "undo"
-	| "underline";
+	;
 
 type EditorPageProps = {
 	params: Promise<{ id: string }>;
@@ -26,26 +21,6 @@ const collaborators = [
 	{ initials: "TR", color: "bg-[#e7ba58]" },
 ];
 
-const toolbarGroups: { label: string; icon: IconName; active?: boolean }[][] = [
-	[
-		{ label: "Undo", icon: "undo" },
-		{ label: "Redo", icon: "redo" },
-	],
-	[
-		{ label: "Text style", icon: "chevron-down" },
-	],
-	[
-		{ label: "Bold", icon: "bold" },
-		{ label: "Italic", icon: "italic" },
-		{ label: "Underline", icon: "underline" },
-	],
-	[
-		{ label: "Bulleted list", icon: "list" },
-		{ label: "Insert link", icon: "link" },
-		{ label: "Insert image", icon: "image" },
-	],
-	];
-
 function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
 	const common = { fill: "none", height: size, viewBox: "0 0 24 24", width: size };
 
@@ -56,41 +31,15 @@ function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
 			return <svg {...common}><path d="M6.5 3.75h7l4 4v12.5h-11V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.6" /><path d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" /></svg>;
 		case "share":
 			return <svg {...common}><path d="M8 12h8M14 6l6 6-6 6M4 5h4v4M4 19h4v-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" /></svg>;
-		case "undo":
-			return <svg {...common}><path d="M9 8 4 12l5 4M5 12h8a6 6 0 0 1 6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" /></svg>;
-		case "redo":
-			return <svg {...common}><path d="m15 8 5 4-5 4M19 12h-8a6 6 0 0 0-6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" /></svg>;
-		case "bold":
-			return <svg {...common}><path d="M8 5h5a3 3 0 0 1 0 6H8V5Zm0 6h6a3.5 3.5 0 0 1 0 7H8v-7ZM8 5v13" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" /></svg>;
-		case "italic":
-			return <svg {...common}><path d="M14 5h-3M13 19h-3M14 5l-4 14" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" /></svg>;
-		case "underline":
-			return <svg {...common}><path d="M7 5v5a5 5 0 0 0 10 0V5M5 19h14" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" /></svg>;
-		case "list":
-			return <svg {...common}><path d="M9 6h10M9 12h10M9 18h10M5 6h.01M5 12h.01M5 18h.01" stroke="currentColor" strokeLinecap="round" strokeWidth="2" /></svg>;
-		case "link":
-			return <svg {...common}><path d="m10 13.5 4-4M8 16l-1 1a3 3 0 0 1-4-4l3-3a3 3 0 0 1 4 0M16 8l1-1a3 3 0 0 1 4 4l-3 3a3 3 0 0 1-4 0" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" /></svg>;
-		case "image":
-			return <svg {...common}><rect height="14" rx="2" stroke="currentColor" strokeWidth="1.7" width="16" x="4" y="5" /><circle cx="9" cy="10" r="1.2" stroke="currentColor" strokeWidth="1.5" /><path d="m5 17 4-4 3 3 2-2 5 4" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.7" /></svg>;
 		case "check":
 			return <svg {...common}><path d="m5 12 4 4L19 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>;
 		case "more":
 			return <svg {...common}><circle cx="5" cy="12" fill="currentColor" r="1.4" /><circle cx="12" cy="12" fill="currentColor" r="1.4" /><circle cx="19" cy="12" fill="currentColor" r="1.4" /></svg>;
-		case "chevron-down":
-			return <svg {...common}><path d="m7 10 5 5 5-5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" /></svg>;
 	}
-}
-
-function ToolbarButton({ label, icon, active = false }: { label: string; icon: IconName; active?: boolean }) {
-	return <button aria-label={label} className={`flex h-8 items-center justify-center rounded-md px-2 text-[#627267] transition hover:bg-[#e8eee5] hover:text-[#17211b] focus:outline-none focus:ring-2 focus:ring-[#db5a3c] ${active ? "bg-[#e1ebe0] text-[#17211b]" : ""}`} title={label} type="button"><Icon name={icon} /></button>;
 }
 
 function CollaboratorAvatars() {
 	return <div aria-label="Three collaborators viewing this document" className="flex items-center">{collaborators.map((collaborator, index) => <span className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#fffdf8] text-[10px] font-bold text-[#17211b] ${collaborator.color} ${index > 0 ? "-ml-2" : ""}`} key={collaborator.initials} title={collaborator.initials}>{collaborator.initials}</span>)}<span className="ml-2 text-xs text-[#718075]">3 here</span></div>;
-}
-
-function EditorToolbar() {
-	return <div aria-label="Formatting toolbar" className="flex min-h-[58px] items-center gap-1 overflow-x-auto border-b border-[#dfe5dc] bg-[#f9faf6] px-4 py-2 sm:px-8">{toolbarGroups.map((group, groupIndex) => <div className="flex shrink-0 items-center gap-0.5" key={groupIndex}>{group.map((control) => <ToolbarButton key={control.label} {...control} />)}{groupIndex < toolbarGroups.length - 1 && <span className="mx-2 h-6 w-px bg-[#dfe5dc]" />}</div>)}</div>;
 }
 
 export default async function EditorPage({ params }: EditorPageProps) {
