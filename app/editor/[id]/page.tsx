@@ -2,71 +2,42 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Editor from "../../../components/Editor";
 import ShareModal from "../../../components/ShareModal";
 
 type IconName = "arrow-left" | "file" | "share" | "more";
 
-const collaborators = [
-  { initials: "AM", color: "bg-[#f0b18f]" },
-  { initials: "JK", color: "bg-[#b8cfb7]" },
-  { initials: "TR", color: "bg-[#e7ba58]" },
+// All possible collaborators — the logged-in user will be marked online
+const ALL_COLLABORATORS = [
+  { username: "testuser", initials: "TU", color: "bg-[#f0b18f]" },
+  { username: "user1",    initials: "U1", color: "bg-[#b8cfb7]" },
+  { username: "user2",    initials: "U2", color: "bg-[#e7ba58]" },
+  { username: "user3",    initials: "U3", color: "bg-[#a8c4e0]" },
 ];
 
 function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
-  const common = {
-    fill: "none",
-    height: size,
-    viewBox: "0 0 24 24",
-    width: size,
-  };
-
+  const common = { fill: "none", height: size, viewBox: "0 0 24 24", width: size };
   switch (name) {
     case "arrow-left":
       return (
         <svg {...common}>
-          <path
-            d="M19 12H5M11 18l-6-6 6-6"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.8"
-          />
+          <path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
         </svg>
       );
-
     case "file":
       return (
         <svg {...common}>
-          <path
-            d="M6.5 3.75h7l4 4v12.5h-11V3.75Z"
-            stroke="currentColor"
-            strokeLinejoin="round"
-            strokeWidth="1.6"
-          />
-          <path
-            d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="1.6"
-          />
+          <path d="M6.5 3.75h7l4 4v12.5h-11V3.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.6" />
+          <path d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" />
         </svg>
       );
-
     case "share":
       return (
         <svg {...common}>
-          <path
-            d="M8 12h8M14 6l6 6-6 6M4 5h4v4M4 19h4v-4"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.7"
-          />
+          <path d="M8 12h8M14 6l6 6-6 6M4 5h4v4M4 19h4v-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
         </svg>
       );
-
     case "more":
       return (
         <svg {...common}>
@@ -78,21 +49,34 @@ function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   }
 }
 
-function CollaboratorAvatars() {
+function CollaboratorAvatars({ loggedInUsername }: { loggedInUsername: string | null }) {
   return (
     <div className="flex items-center">
-      {collaborators.map((collaborator, index) => (
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#fffdf8] text-[10px] font-bold text-[#17211b] ${collaborator.color} ${
-            index > 0 ? "-ml-2" : ""
-          }`}
-          key={collaborator.initials}
-        >
-          {collaborator.initials}
-        </span>
-      ))}
+      {ALL_COLLABORATORS.map((user, index) => {
+        const isOnline = user.username === loggedInUsername;
+        return (
+          <div key={user.username} className={`relative ${index > 0 ? "-ml-2" : ""}`}>
+            {/* Avatar circle */}
+            <span
+              className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#fffdf8] text-[10px] font-bold text-[#17211b] ${user.color}`}
+              title={user.username}
+            >
+              {user.initials}
+            </span>
 
-      <span className="ml-2 text-xs text-[#718075]">3 here</span>
+            {/* Online / offline dot */}
+            <span
+              className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#fffdf8] ${
+                isOnline ? "bg-[#86a889]" : "bg-[#c5cdc6]"
+              }`}
+            />
+          </div>
+        );
+      })}
+
+      <span className="ml-3 text-xs text-[#718075]">
+        {loggedInUsername ? "1 online" : "0 online"}
+      </span>
     </div>
   );
 }
@@ -102,6 +86,20 @@ export default function EditorPage() {
   const roomId = params.id;
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [loggedInUsername, setLoggedInUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Read the user saved at login
+    const raw = localStorage.getItem("synora_user");
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        setLoggedInUsername(parsed.username ?? null);
+      } catch {
+        setLoggedInUsername(null);
+      }
+    }
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#f7f8f3] text-[#17211b]">
@@ -116,17 +114,12 @@ export default function EditorPage() {
               <Icon name="arrow-left" />
             </Link>
 
-            <Link
-              className="hidden items-center gap-2.5 border-r border-[#dfe5dc] pr-5 sm:flex"
-              href="/"
-            >
+            <Link className="hidden items-center gap-2.5 border-r border-[#dfe5dc] pr-5 sm:flex" href="/">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#17211b] text-[#fffdf8]">
                 <Icon name="file" size={18} />
               </span>
-
               <span className="text-[15px] font-semibold">
-                Debugger&apos;s{" "}
-                <span className="text-[#db5a3c]">File Editor</span>
+                synora<span className="text-[#db5a3c]">.</span>
               </span>
             </Link>
 
@@ -137,20 +130,18 @@ export default function EditorPage() {
                 defaultValue="Project Architecture & Roadmap"
                 readOnly
               />
-
-              <p className="px-1 text-[11px] text-[#8a968b]">
-                Collaborative document
-              </p>
+              <p className="px-1 text-[11px] text-[#8a968b]">Collaborative document</p>
             </div>
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
+            {/* Connection status */}
             <div className="hidden items-center gap-2 text-xs text-[#718075] md:flex">
-              <span className="h-2 w-2 rounded-full bg-[#86a889]" />
-              Connected
+              <span className={`h-2 w-2 rounded-full ${loggedInUsername ? "bg-[#86a889]" : "bg-[#c5cdc6]"}`} />
+              {loggedInUsername ? "Connected" : "Offline"}
             </div>
 
-            <CollaboratorAvatars />
+            <CollaboratorAvatars loggedInUsername={loggedInUsername} />
 
             <button
               className="flex h-9 items-center gap-2 rounded-full bg-[#db5a3c] px-4 text-sm font-semibold text-white hover:bg-[#c84d31]"
@@ -178,10 +169,7 @@ export default function EditorPage() {
         </div>
       </section>
 
-      <ShareModal
-        isOpen={shareOpen}
-        onClose={() => setShareOpen(false)}
-      />
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} />
     </main>
   );
 }
