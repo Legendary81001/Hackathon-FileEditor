@@ -52,24 +52,66 @@ export default function Editor({ roomId }: EditorProps) {
     collaboration.provider.synced
   );
 
-  // Get the user who logged in
+  // Load the logged-in user from localStorage
   useEffect(() => {
-    const username = localStorage.getItem("synora_user");
+    const storedUser = localStorage.getItem("synora_user");
 
-    if (!username) {
+    if (!storedUser) {
       setCurrentUser(users[0]);
       return;
     }
 
-    const loggedInUser = users.find(
-      (user) => user.username === username
-    );
+    try {
+      const parsedUser = JSON.parse(storedUser);
 
-    if (loggedInUser) {
-      setCurrentUser(loggedInUser);
-    } else {
-      setCurrentUser(users[0]);
+      // Current login format:
+      // {
+      //   username: "user1",
+      //   initials: "U1",
+      //   color: "bg-[#b8cfb7]"
+      // }
+
+      if (
+        parsedUser &&
+        typeof parsedUser === "object" &&
+        typeof parsedUser.username === "string"
+      ) {
+        const matchingUser = users.find(
+          (user) => user.username === parsedUser.username
+        );
+
+        if (matchingUser) {
+          setCurrentUser(matchingUser);
+          return;
+        }
+      }
+
+      // Backwards compatibility if localStorage contains:
+      // "user1"
+      if (typeof parsedUser === "string") {
+        const matchingUser = users.find(
+          (user) => user.username === parsedUser
+        );
+
+        if (matchingUser) {
+          setCurrentUser(matchingUser);
+          return;
+        }
+      }
+    } catch {
+      // If it isn't JSON, treat it as a plain username
+      const matchingUser = users.find(
+        (user) => user.username === storedUser
+      );
+
+      if (matchingUser) {
+        setCurrentUser(matchingUser);
+        return;
+      }
     }
+
+    // Only fall back if the stored user is invalid
+    setCurrentUser(users[0]);
   }, []);
 
   // Wait for the Yjs document to synchronize
