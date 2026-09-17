@@ -1,19 +1,44 @@
-# Synora Collaborative Editor
+# Real-Time Collaborative Document Editor
 
-A minimal Next.js starter for the Synora hackathon project.
+## Overview
 
-## Run locally
+A web-based collaborative rich text editor built for the SYNORA Full Stack Engineering challenge. Multiple users can edit the same document in real time, with formatting and cursor positions synchronized between connected clients.
+
+The editor uses Yjs for conflict-free replicated editing and Liveblocks for real-time synchronization and document persistence.
+
+**Deployed application:** https://hackathonfileeditor-gray.vercel.app/
+
+## Tech Stack
+
+* Next.js
+* React
+* TypeScript
+* TipTap
+* Yjs
+* Liveblocks
+* Tailwind CSS
+* Vercel
+
+## Running Locally
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Create `.env.local` and add the Liveblocks public key:
+
+```env
+NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY=your_liveblocks_public_key
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open `http://localhost:3000`.
 
-## Available scripts
-
-- `npm run dev` starts the development server.
-- `npm run build` creates a production build.
-- `npm run start` serves the production build.
-- `npm run lint` checks the project with ESLint.
+To test collaboration, open the same document URL in two browser windows or on two devices and sign in with different demo accounts.
