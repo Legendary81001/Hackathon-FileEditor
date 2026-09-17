@@ -13,6 +13,7 @@ export function createYjsProvider(roomId: string) {
   return {
     provider,
     ydoc: provider.getYDoc(),
+    room,
     leave,
   };
 }

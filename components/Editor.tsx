@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCaret from "@tiptap/extension-collaboration-caret";
 import { createYjsProvider } from "../lib/yjs";
 
 type EditorProps = {
@@ -12,7 +13,10 @@ type EditorProps = {
 
 export default function Editor({ roomId }: EditorProps) {
   const [collaboration] = useState(() => createYjsProvider(roomId));
-  const [synced, setSynced] = useState(collaboration.provider.synced);
+
+  const [synced, setSynced] = useState(
+    collaboration.provider.synced
+  );
 
   useEffect(() => {
     if (collaboration.provider.synced) {
@@ -40,11 +44,21 @@ export default function Editor({ roomId }: EditorProps) {
         StarterKit.configure({
           undoRedo: false,
         }),
+
         Collaboration.configure({
           document: collaboration.ydoc,
         }),
+
+        CollaborationCaret.configure({
+          provider: collaboration.provider,
+          user: {
+            name: `User ${Math.floor(Math.random() * 1000)}`,
+            color: "#7c3aed",
+          },
+        }),
       ],
-      content: "<p>Start writing...</p>",
+
+      immediatelyRender: false,
     },
     [synced]
   );
@@ -61,7 +75,7 @@ export default function Editor({ roomId }: EditorProps) {
 
   return (
     <main className="min-h-screen bg-[#f7f8f3] p-8">
-      <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
+      <div className="tiptap mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
         <EditorContent editor={editor} />
       </div>
     </main>
