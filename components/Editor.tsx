@@ -5,6 +5,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCaret from "@tiptap/extension-collaboration-caret";
+import EditorToolbar from "./EditorToolbar";
 import { createYjsProvider } from "../lib/yjs";
 
 type EditorProps = {
@@ -40,6 +41,8 @@ export default function Editor({ roomId }: EditorProps) {
 
   const editor = useEditor(
     {
+      immediatelyRender: false,
+
       extensions: [
         StarterKit.configure({
           undoRedo: false,
@@ -57,8 +60,7 @@ export default function Editor({ roomId }: EditorProps) {
           },
         }),
       ],
-
-      immediatelyRender: false,
+      content: "<p>Start writing...</p>",
     },
     [synced]
   );
@@ -74,9 +76,19 @@ export default function Editor({ roomId }: EditorProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8f3] p-8">
-      <div className="tiptap mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
-        <EditorContent editor={editor} />
+    <main className="min-h-screen bg-[#f7f8f3]">
+      <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl bg-white shadow-sm">
+
+        {/* Formatting toolbar */}
+        <EditorToolbar editor={editor} />
+
+        {/* Document */}
+        <div className="min-h-[650px] p-8 sm:p-10">
+          <div className="editor-content">
+            <EditorContent editor={editor} />
+          </div>
+        </div>
+
       </div>
     </main>
   );
